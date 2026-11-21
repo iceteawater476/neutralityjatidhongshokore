@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Neutral Axis Calculator</title>
 <style>
@@ -10,168 +8,113 @@
 :root[data-theme="dark"]{--bg:#161616;--card:#222;--tx:#eee;--mut:#9a9a94;--bd:#3a3a36;--ac:#6ea8ff;--na:#ff6b9a;--fill:#2b4468;--bl:#5fd07a;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
-main{max-width:880px;margin:0 auto}
-h1{font-size:1.4rem;margin:0 0 4px}
-.sub{color:var(--mut);margin:0 0 16px;font-size:.9rem}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.4rem;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 16px;font-size:.9rem}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
 .card h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 10px}
 .seg{display:flex;flex-wrap:wrap;gap:8px}
 .seg button{flex:1 1 90px;padding:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:8px;font:inherit;cursor:pointer}
 .seg button.on{border-color:var(--ac);background:var(--ac);color:#fff}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-label{font-size:.85rem;color:var(--mut);display:block}
-input{width:100%;padding:9px;margin-top:3px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:700px){.two{grid-template-columns:1fr}}
-.scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
-th,td{border:1px solid var(--bd);padding:7px 9px;text-align:right}
-th:first-child,td:first-child{text-align:left}
-th{background:var(--bg)}
-.res{font-size:1.15rem;margin-top:12px;padding:12px;border:2px solid var(--na);border-radius:10px}
-.res b{color:var(--na)}
-.work{color:var(--mut);font-size:.9rem;margin-top:6px}
-svg{width:100%;height:auto;max-height:360px}
-#hand div{margin:4px 0}
+th,td{border:1px solid var(--bd);padding:6px 9px;text-align:right}
+th:first-child,td:first-child{text-align:left}th{background:var(--bg)}
+.dim td{border:0;border-bottom:1px solid var(--bd)}.dim td:nth-child(2){color:var(--mut);text-align:center;width:60px}.dim td:last-child{color:var(--mut);text-align:left;width:50px}
+.dim input{width:100%;padding:7px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;text-align:right}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.two{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+.res{font-size:1.15rem;margin-bottom:12px;padding:12px;border:2px solid var(--na);border-radius:10px}.res b{color:var(--na)}
+.hl{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin-top:12px}
 #hand mjx-container{margin:6px 0!important;max-width:100%;overflow-x:auto;overflow-y:hidden}
-.hl{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin-top:14px!important}
-.fin{color:var(--na);font-size:1.3rem}
-.sm{color:var(--mut);font-size:.85rem;margin-top:8px!important}
-</style>
-</head>
-<body>
-<main>
+svg{width:100%;height:auto;max-height:340px}.note{color:var(--mut);font-size:.8rem;margin-top:6px}
+</style></head><body><main>
 <h1>Neutral Axis Calculator</h1>
-<p class="sub">Pick a section, enter the dimensions, choose the baseline. Neutral axis = ΣA·y ÷ ΣA.</p>
-
+<p class="sub">Enter section properties as in the Dlubal / steel tables, pick a baseline, and get the neutral axis (ΣA·d ÷ ΣA).</p>
 <div class="card"><h2>1 · Section</h2><div class="seg" id="shapes"></div></div>
-<div class="card"><h2>2 · Dimensions <span style="text-transform:none">(<input id="unit" value="mm" style="width:60px;display:inline;padding:2px 6px;margin:0">)</span></h2><div class="grid" id="inputs"></div></div>
-<div class="card"><h2>3 · Rotation <span id="ang" style="text-transform:none"></span></h2><div class="seg"><button onclick="spin(-1)">⟲ Rotate left 90°</button><button onclick="spin(1)">⟳ Rotate right 90°</button><button onclick="rot=0;calc()">Reset</button></div></div>
-<div class="card"><h2>4 · Baseline</h2><div class="seg" id="bases"></div></div>
-
+<div class="card"><h2>2 · Units and dimensions</h2><div class="seg" id="units" style="margin-bottom:10px"></div><table class="dim" id="dims"></table></div>
 <div class="two">
-  <div class="card"><h2>Section</h2><svg id="svg" viewBox="0 0 320 320"></svg></div>
-  <div class="card"><h2>Result</h2>
-    <div class="seg" style="margin-bottom:10px"><button id="fHand" onclick="setFmt('hand')">Hand calc</button><button id="fTable" onclick="setFmt('table')">Table</button></div>
-    <div id="hand"></div>
-    <div class="scroll" id="tblw"><table id="tbl"></table></div>
-    <div class="res" id="res"></div>
-    <div class="work" id="work"></div>
-  </div>
+<div class="card"><h2>3 · Rotation <span id="ang" style="text-transform:none"></span></h2><div class="seg"><button onclick="spin(-1)">⟲ Left 90°</button><button onclick="spin(1)">⟳ Right 90°</button><button onclick="rot=0;calc()">Reset</button></div></div>
+<div class="card"><h2>4 · Baseline</h2><div class="seg" id="bases"></div></div>
+</div>
+<div class="two">
+<div class="card"><h2>Section</h2><svg id="svg" viewBox="0 0 320 320"></svg><div class="note">Toe radii (L-section) are included in the calculation and shown as dots, not drawn.</div></div>
+<div class="card"><h2>Result</h2><div class="res" id="res"></div>
+<div class="seg" style="margin-bottom:8px"><button id="fHand" onclick="setFmt('hand')">Hand calc</button><button id="fTable" onclick="setFmt('table')">Table</button></div>
+<div id="hand"></div><div class="scroll" id="tblw"><table id="tbl"></table></div></div>
 </div>
 </main>
 <script>window.MathJax={startup:{typeset:false},svg:{fontCache:'none'}};</script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" onload="MathJax.startup.promise.then(function(){calc()})"></script>
 <script>
+var K=1-Math.PI/4,C=(10-3*Math.PI)/(3*(4-Math.PI));
+function rect(n,x,y,w,h,dv){return {n:n,A:w*h,cx:x+w/2,cy:y+h/2,rx:x,ry:y,rw:w,rh:h,dv:dv}}
+function sp(n,cnt,r,sg,cx,cy){return {n:n,A:sg*cnt*K*r*r,cx:cx,cy:cy,r:r,cnt:cnt,sg:sg}}
 var SHAPES={
- T:{label:"T-section",f:[["bf","Flange width",150],["tf","Flange thickness",20],["tw","Web thickness",20],["hw","Web height",130]],
-   r:function(v){return [{n:"Flange",x:0,y:v.hw,w:v.bf,h:v.tf},{n:"Web",x:(v.bf-v.tw)/2,y:0,w:v.tw,h:v.hw}]}},
- R:{label:"Rectangle",f:[["b","Width",50],["h","Height",330]],
-   r:function(v){return [{n:"Rectangle",x:0,y:0,w:v.b,h:v.h}]}}
+ T:{label:"T-section (half UB)",f:[["h","Depth","h",156.3],["b","Width","b",102.4],["tw","Web thickness","t<sub>w</sub>",6.6],["tf","Flange thickness","t<sub>f</sub>",10.8]],
+  parts:function(v){var hw=v.h-v.tf;return [rect("Flange",0,hw,v.b,v.tf),rect("Web",(v.b-v.tw)/2,0,v.tw,hw,"h_w = h - t_f = "+fmt(v.h)+" - "+fmt(v.tf)+" = "+fmt(hw))]}},
+ L:{label:"L-section (angle)",f:[["h","Depth","h",100],["b","Width","b",65],["t","Thickness","t",8],["r2","Toe radius","r<sub>2</sub>",5]],
+  parts:function(v){return [rect("Vertical leg",0,0,v.t,v.h),rect("Horizontal leg",v.t,0,v.b-v.t,v.t,"w_2 = b - t = "+fmt(v.b)+" - "+fmt(v.t)+" = "+fmt(v.b-v.t)),sp("Toe (vertical leg)",1,v.r2,-1,v.t-C*v.r2,v.h-C*v.r2),sp("Toe (horizontal leg)",1,v.r2,-1,v.b-C*v.r2,v.t-C*v.r2)]}},
+ R:{label:"Rectangle",f:[["b","Width","b",50],["h","Depth","h",330]],parts:function(v){return [rect("Rectangle",0,0,v.b,v.h)]}}
 };
 var BASES={bottom:"Bottom edge",top:"Top edge",left:"Left edge",right:"Right edge"};
-var shape="T",base="bottom",rot=0,vals={};
-var fmtMode="hand";
-function setFmt(m){fmtMode=m;calc()}
-function applyFmt(){var h=fmtMode==="hand";$("hand").style.display=h?"":"none";$("tblw").style.display=h?"none":"";$("res").style.display=h?"none":"";$("work").style.display=h?"none":"";$("fHand").className=h?"on":"";$("fTable").className=h?"":"on"}
-function spin(d){rot=(rot+d+4)%4;calc()}
-function rotate(rs,k){for(var i=0;i<k;i++){var W=0;rs.forEach(function(r){W=Math.max(W,r.x+r.w)});rs=rs.map(function(r){return {n:r.n,x:r.y,y:W-r.x-r.w,w:r.h,h:r.w}})}return rs}
-for(var k in SHAPES){vals[k]={};SHAPES[k].f.forEach(function(f){vals[k][f[0]]=f[2]})}
+var shape="T",base="top",rot=0,unit="mm",fmtMode="hand",vals={};
+for(var k in SHAPES){vals[k]={};SHAPES[k].f.forEach(function(f){vals[k][f[0]]=f[3]})}
 var $=function(i){return document.getElementById(i)};
-function fmt(n){return (Math.round(n*1000)/1000).toString()}
-
-function buildButtons(id,obj,get,set){
-  var el=$(id);el.innerHTML="";
-  Object.keys(obj).forEach(function(k){
-    var b=document.createElement("button");
-    b.textContent=typeof obj[k]==="string"?obj[k]:obj[k].label;
-    if(get()===k)b.className="on";
-    b.onclick=function(){set(k);render()};
-    el.appendChild(b);
-  });
-}
-function buildInputs(){
-  var el=$("inputs");el.innerHTML="";
-  SHAPES[shape].f.forEach(function(f){
-    var l=document.createElement("label");l.textContent=f[1];
-    var i=document.createElement("input");i.type="number";i.min="0";i.step="any";i.inputMode="decimal";
-    i.value=vals[shape][f[0]];
-    i.oninput=function(){vals[shape][f[0]]=parseFloat(i.value)||0;calc()};
-    l.appendChild(i);el.appendChild(l);
-  });
-}
+function fmt(n){var d=unit==="m"?5:3,p=Math.pow(10,d);return String(Math.round(n*p)/p)}
+function spin(d){rot=(rot+d+4)%4;calc()}
+function setFmt(m){fmtMode=m;calc()}
+function btns(id,obj,get,set){var el=$(id);el.innerHTML="";Object.keys(obj).forEach(function(k){var b=document.createElement("button");b.textContent=typeof obj[k]==="string"?obj[k]:obj[k].label;if(get()===k)b.className="on";b.onclick=function(){set(k);render()};el.appendChild(b)})}
+function setUnit(u){if(u===unit)return;var f=u==="m"?0.001:1000;for(var s in vals)for(var k in vals[s])vals[s][k]=Math.round(vals[s][k]*f*1e9)/1e9;unit=u}
 function render(){
-  buildButtons("shapes",SHAPES,function(){return shape},function(k){shape=k});
-  buildButtons("bases",BASES,function(){return base},function(k){base=k});
-  buildInputs();calc();
+ btns("shapes",SHAPES,function(){return shape},function(k){shape=k});
+ btns("units",{mm:"Millimetres (mm)",m:"Metres (m)"},function(){return unit},setUnit);
+ btns("bases",BASES,function(){return base},function(k){base=k});
+ var t=$("dims");t.innerHTML="";
+ SHAPES[shape].f.forEach(function(f){var tr=document.createElement("tr");
+  tr.innerHTML="<td>"+f[1]+"</td><td>"+f[2]+"</td><td><input type=number min=0 step=any inputmode=decimal></td><td>"+unit+"</td>";
+  var i=tr.querySelector("input");i.value=vals[shape][f[0]];i.oninput=function(){vals[shape][f[0]]=parseFloat(i.value)||0;calc()};t.appendChild(tr)});
+ calc();
 }
+function rot90(ps,W,H){return {W:H,H:W,ps:ps.map(function(p){var q=Object.assign({},p);q.cx=p.cy;q.cy=W-p.cx;if(p.rw!==undefined){q.rx=p.ry;q.ry=W-p.rx-p.rw;q.rw=p.rh;q.rh=p.rw}return q})}}
+function tn(x){return x<0?"("+fmt(x)+")":fmt(x)}
 function calc(){
-  var u=$("unit").value||"";
-  var rs=rotate(SHAPES[shape].r(vals[shape]),rot);
-  $("ang").textContent="("+rot*90+"° clockwise)";
-  var W=0,H=0;rs.forEach(function(r){W=Math.max(W,r.x+r.w);H=Math.max(H,r.y+r.h)});
-  var vert=(base==="bottom"||base==="top");
-  var sumA=0,sumAd=0,rows="";
-  rs.forEach(function(r){
-    r.A=r.w*r.h;
-    var c=vert?r.y+r.h/2:r.x+r.w/2;
-    r.d=base==="bottom"?c:base==="top"?H-c:base==="left"?c:W-c;
-    r.Ad=r.A*r.d;sumA+=r.A;sumAd+=r.Ad;
-    rows+="<tr><td>"+r.n+"</td><td>"+fmt(r.A)+"</td><td>"+fmt(r.d)+"</td><td>"+fmt(r.Ad)+"</td></tr>";
-  });
-  $("tbl").innerHTML="<tr><th>Part</th><th>A ("+u+"²)</th><th>"+(vert?"y":"x")+" ("+u+")</th><th>A·"+(vert?"y":"x")+"</th></tr>"+rows+
-    "<tr><th>Σ</th><th>"+fmt(sumA)+"</th><th></th><th>"+fmt(sumAd)+"</th></tr>";
-  if(!sumA){applyFmt();$("hand").textContent="Enter dimensions greater than 0.";$("res").textContent="Enter dimensions greater than 0.";$("work").textContent="";draw(rs,W,H,0);return}
-  var N=sumAd/sumA,tot=vert?H:W;
-  var ax=vert?"y":"x",hs="<div class=hl>Area of each part</div>",ms="<div class=hl>Area moment about the baseline</div>",pa=[],pm=[];
-  rs.forEach(function(r,i){var n=i+1;
-    hs+="<div>A<sub>"+n+"</sub> ("+r.n+") = "+fmt(r.w)+" × "+fmt(r.h)+" = <b>"+fmt(r.A)+" "+u+"²</b></div>";
-    ms+="<div>M<sub>"+n+"</sub> = A<sub>"+n+"</sub> × "+ax+"<sub>"+n+"</sub> = "+fmt(r.A)+" × "+fmt(r.d)+" = <b>"+fmt(r.Ad)+" "+u+"³</b></div>";
-    pa.push(fmt(r.A));pm.push(fmt(r.Ad))});
-  var ml=rs.map(function(r,i){return "M<sub>"+(i+1)+"</sub>"}).join(" + "),al=rs.map(function(r,i){return "A<sub>"+(i+1)+"</sub>"}).join(" + ");
-  var B=String.fromCharCode(92),tu=u.replace(/[^A-Za-z0-9 .µ°-]/g,""),U=tu?B+" "+B+"text{"+tu+"}":"",U2=tu?U+"^{2}":"",U3=tu?U+"^{3}":"";
-  var tm=" "+B+"times ",nl=" "+B+B+" ",o=B+"["+B+"begin{aligned}",c=B+"end{aligned}"+B+"]";
-  var t1=rs.map(function(r,i){return "A_{"+(i+1)+"}"+B+" ("+B+"text{"+r.n+"}) &= "+fmt(r.w)+tm+fmt(r.h)+" = "+fmt(r.A)+U2}).join(nl);
-  var t2=rs.map(function(r,i){var n=i+1;return "M_{"+n+"} &= A_{"+n+"}"+tm+ax+"_{"+n+"} = "+fmt(r.A)+tm+fmt(r.d)+" = "+fmt(r.Ad)+U3}).join(nl);
-  var sM=rs.map(function(r,i){return "M_{"+(i+1)+"}"}).join("+"),sA=rs.map(function(r,i){return "A_{"+(i+1)+"}"}).join("+");
-  var t3=B+"text{NA} &= "+B+"dfrac{"+sM+"}{"+sA+"}"+nl+"&= "+B+"dfrac{"+pm.join("+")+"}{"+pa.join("+")+"}"+nl+"&= "+B+"boxed{"+fmt(N)+U+"}";
-  $("hand").innerHTML="<div class=hl>Area of each part</div>"+o+t1+c+"<div class=hl>Area moment about the baseline</div>"+o+t2+c+"<div class=hl>Neutral axis from the "+BASES[base].toLowerCase()+"</div>"+o+t3+c+"<div class=sm>From the opposite edge: "+fmt(tot-N)+" "+u+"</div>";
-  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([$("hand")]);
-  var oldHtml=hs+ms+"<div class=hl>Neutral axis</div><div>NA = ("+ml+") / ("+al+")</div><div>= ("+pm.join(" + ")+") / ("+pa.join(" + ")+")</div><div>= <b class=fin>"+fmt(N)+" "+u+"</b> from the "+BASES[base].toLowerCase()+"</div><div class=sm>From the opposite edge: "+fmt(tot-N)+" "+u+"</div>";
-  applyFmt();
-  var sym=vert?"ȳ":"x̄";
-  $("res").innerHTML=sym+" = <b>"+fmt(N)+" "+u+"</b> from the "+BASES[base].toLowerCase();
-  $("work").textContent=sym+" = ΣA·"+(vert?"y":"x")+" / ΣA = "+fmt(sumAd)+" / "+fmt(sumA)+" = "+fmt(N)+" "+u+
-    "  ·  from the opposite edge: "+fmt(tot-N)+" "+u;
-  draw(rs,W,H,N);
+ var v=vals[shape],ps=SHAPES[shape].parts(v).filter(function(p){return p.A!==0}),W=v.b,H=v.h;
+ for(var i=0;i<rot;i++){var r=rot90(ps,W,H);ps=r.ps;W=r.W;H=r.H}
+ $("ang").textContent="("+rot*90+"° clockwise)";
+ var vert=(base==="bottom"||base==="top"),ax=vert?"y":"x",sA=0,sM=0,rows="";
+ ps.forEach(function(p){var c=vert?p.cy:p.cx;p.d=base==="bottom"||base==="left"?c:(vert?H:W)-c;p.M=p.A*p.d;sA+=p.A;sM+=p.M;
+  rows+="<tr><td>"+p.n+"</td><td>"+fmt(p.A)+"</td><td>"+fmt(p.d)+"</td><td>"+fmt(p.M)+"</td></tr>"});
+ $("tbl").innerHTML="<tr><th>Part</th><th>A ("+unit+"²)</th><th>"+ax+" ("+unit+")</th><th>A·"+ax+" ("+unit+"³)</th></tr>"+rows+"<tr><th>Σ</th><th>"+fmt(sA)+"</th><th></th><th>"+fmt(sM)+"</th></tr>";
+ var h=fmtMode==="hand";$("hand").style.display=h?"":"none";$("tblw").style.display=h?"none":"";$("fHand").className=h?"on":"";$("fTable").className=h?"":"on";
+ if(sA<=0){$("res").textContent="Enter dimensions greater than 0.";$("hand").textContent="";draw(ps,W,H,0);return}
+ var N=sM/sA,tot=vert?H:W;
+ $("res").innerHTML="Neutral axis = <b>"+fmt(N)+" "+unit+"</b> from the "+BASES[base].toLowerCase()+" <span class=note>("+fmt(tot-N)+" "+unit+" from the opposite edge)</span>";
+ var B=String.fromCharCode(92),U=B+"text{"+unit+"}",tm=" "+B+"times ",nl=" "+B+B+" ",o=B+"["+B+"begin{aligned}",c=B+"end{aligned}"+B+"]";
+ var t1=ps.map(function(p,i){var f=p.rw!==undefined?fmt(p.rw)+tm+fmt(p.rh):(p.sg<0?"-":"")+(p.cnt>1?p.cnt+tm:"")+"(1-"+B+"pi/4)"+tm+fmt(p.r)+"^{2}";
+  return "A_{"+(i+1)+"}"+B+" ("+B+"text{"+p.n+"}) &= "+f+" = "+fmt(p.A)+B+" "+U+"^{2}"}).join(nl)+nl+B+"Sigma A &= "+ps.map(function(p,i){return "A_{"+(i+1)+"}"}).join("+")+" = "+ps.map(function(p){return tn(p.A)}).join(" + ")+" = "+fmt(sA)+B+" "+U+"^{2}"+(unit==="mm"?" = "+fmt(sA/100)+B+" "+B+"text{cm}^{2}":"");
+ var t2=ps.map(function(p,i){var n=i+1;return "M_{"+n+"} &= A_{"+n+"}"+tm+ax+"_{"+n+"} = "+tn(p.A)+tm+fmt(p.d)+" = "+tn(p.M)+B+" "+U+"^{3}"}).join(nl);
+ var dvs=ps.filter(function(p){return p.dv}).map(function(p){return p.dv});var lM=ps.map(function(p,i){return "M_{"+(i+1)+"}"}).join("+"),lA=ps.map(function(p,i){return "A_{"+(i+1)+"}"}).join("+");
+ var t3=B+"text{NA} &= "+B+"dfrac{"+lM+"}{"+lA+"}"+nl+"&= "+B+"dfrac{"+ps.map(function(p){return tn(p.M)}).join("+")+"}{"+ps.map(function(p){return tn(p.A)}).join("+")+"}"+nl+"&= "+B+"boxed{"+fmt(N)+B+" "+U+"}";
+ $("hand").innerHTML=(dvs.length?"<div class=hl>Divide the section into parts</div>"+o+dvs.join(nl)+c:"")+"<div class=hl>Area of each part and total area</div>"+o+t1+c+"<div class=hl>Area moment about the baseline</div>"+o+t2+c+"<div class=hl>Neutral axis from the "+BASES[base].toLowerCase()+"</div>"+o+t3+c;
+ if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([$("hand")]);
+ draw(ps,W,H,N);
 }
-function draw(rs,W,H,N){
-  var vert=(base==="bottom"||base==="top");
-  var P=28,S=Math.min((320-2*P)/(W||1),(320-2*P)/(H||1));
-  var ox=(320-W*S)/2,oy=(320-H*S)/2;
-  var X=function(x){return ox+x*S},Y=function(y){return oy+(H-y)*S};
-  var g="";
-  rs.forEach(function(r,i){g+='<rect x="'+X(r.x)+'" y="'+Y(r.y+r.h)+'" width="'+r.w*S+'" height="'+r.h*S+'" fill="var(--fill)" stroke="var(--tx)" stroke-width="1.5"/>';g+='<text x="'+X(r.x+r.w/2)+'" y="'+(Y(r.y+r.h/2)+4)+'" font-size="11" text-anchor="middle" fill="var(--tx)">A'+(i+1)+'</text>'});
-  var bl,na,lbl;
-  if(vert){
-    var by=base==="bottom"?Y(0):Y(H);
-    var ny=base==="bottom"?Y(N):Y(H-N);
-    bl='<line x1="'+(ox-12)+'" x2="'+(ox+W*S+12)+'" y1="'+by+'" y2="'+by+'" stroke="var(--bl)" stroke-width="3"/>';
-    na='<line x1="'+(ox-12)+'" x2="'+(ox+W*S+12)+'" y1="'+ny+'" y2="'+ny+'" stroke="var(--na)" stroke-width="2" stroke-dasharray="6 4"/>';
-    lbl='<text x="'+(ox+W*S+14)+'" y="'+(ny-4)+'" font-size="11" fill="var(--na)" text-anchor="end">N.A. = '+fmt(N)+'</text>'+
-        '<text x="'+(ox-12)+'" y="'+(base==="bottom"?by+16:by-8)+'" font-size="11" fill="var(--bl)">baseline</text>';
-  }else{
-    var bx=base==="left"?X(0):X(W);
-    var nx=base==="left"?X(N):X(W-N);
-    bl='<line y1="'+(oy-12)+'" y2="'+(oy+H*S+12)+'" x1="'+bx+'" x2="'+bx+'" stroke="var(--bl)" stroke-width="3"/>';
-    na='<line y1="'+(oy-12)+'" y2="'+(oy+H*S+12)+'" x1="'+nx+'" x2="'+nx+'" stroke="var(--na)" stroke-width="2" stroke-dasharray="6 4"/>';
-    lbl='<text x="'+(nx+4)+'" y="'+(oy-16)+'" font-size="11" fill="var(--na)">N.A. = '+fmt(N)+'</text>'+
-        '<text x="'+bx+'" y="'+(oy+H*S+26)+'" font-size="11" fill="var(--bl)" text-anchor="'+(base==="left"?"start":"end")+'">baseline</text>';
-  }
-  $("svg").innerHTML=g+bl+na+lbl;
+function draw(ps,W,H,N){
+ var vert=(base==="bottom"||base==="top"),P=28,S=Math.min((320-2*P)/(W||1),(320-2*P)/(H||1)),ox=(320-W*S)/2,oy=(320-H*S)/2;
+ var X=function(x){return ox+x*S},Y=function(y){return oy+(H-y)*S},g="";
+ ps.forEach(function(p,i){
+  if(p.rw!==undefined)g+='<rect x="'+X(p.rx)+'" y="'+Y(p.ry+p.rh)+'" width="'+p.rw*S+'" height="'+p.rh*S+'" fill="var(--fill)" stroke="var(--tx)" stroke-width="1.5"/>';
+  else g+='<circle cx="'+X(p.cx)+'" cy="'+Y(p.cy)+'" r="3" fill="'+(p.sg<0?"var(--na)":"var(--tx)")+'"/>';
+  g+='<text x="'+X(p.cx)+'" y="'+(Y(p.cy)+(p.rw!==undefined?4:-6))+'" font-size="10" text-anchor="middle" fill="var(--tx)">A'+(i+1)+'</text>'});
+ var bl,na,lb;
+ if(vert){var by=base==="bottom"?Y(0):Y(H),ny=base==="bottom"?Y(N):Y(H-N);
+  bl='<line x1="'+(ox-12)+'" x2="'+(ox+W*S+12)+'" y1="'+by+'" y2="'+by+'" stroke="var(--bl)" stroke-width="3"/>';
+  na='<line x1="'+(ox-12)+'" x2="'+(ox+W*S+12)+'" y1="'+ny+'" y2="'+ny+'" stroke="var(--na)" stroke-width="2" stroke-dasharray="6 4"/>';
+  lb='<text x="'+(ox+W*S+14)+'" y="'+(ny-4)+'" font-size="11" fill="var(--na)" text-anchor="end">N.A. = '+fmt(N)+'</text><text x="'+(ox-12)+'" y="'+(base==="bottom"?by+16:by-8)+'" font-size="11" fill="var(--bl)">baseline</text>'}
+ else{var bx=base==="left"?X(0):X(W),nx=base==="left"?X(N):X(W-N);
+  bl='<line y1="'+(oy-12)+'" y2="'+(oy+H*S+12)+'" x1="'+bx+'" x2="'+bx+'" stroke="var(--bl)" stroke-width="3"/>';
+  na='<line y1="'+(oy-12)+'" y2="'+(oy+H*S+12)+'" x1="'+nx+'" x2="'+nx+'" stroke="var(--na)" stroke-width="2" stroke-dasharray="6 4"/>';
+  lb='<text x="'+(nx+4)+'" y="'+(oy-16)+'" font-size="11" fill="var(--na)">N.A. = '+fmt(N)+'</text><text x="'+bx+'" y="'+(oy+H*S+26)+'" font-size="11" fill="var(--bl)" text-anchor="'+(base==="left"?"start":"end")+'">baseline</text>'}
+ $("svg").innerHTML=g+bl+na+lb;
 }
-$("unit").oninput=calc;
 render();
-</script>
-</body>
-</html>
+</script></body></html>
